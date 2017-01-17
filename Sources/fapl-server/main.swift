@@ -7,3 +7,5 @@
 //
 
 let server = FAPLServer.init()
+
+server.run()

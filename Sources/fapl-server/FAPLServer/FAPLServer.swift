@@ -11,15 +11,17 @@ import PerfectHTTPServer
 import PerfectLib
 import PerfectMustache
 import Foundation
+import SwiftyJSON
 
-let kPort = UInt16(8080)
+let kPort = UInt16(8181)
 
-class FAPLServer {
+class FAPLServer  {
     fileprivate let server = HTTPServer()
+    
     
     //MARK: - Lifecycle
     
-    init() {
+    func run() {
         server.documentRoot = "./webroot"
         
         server.serverPort = kPort
@@ -30,25 +32,35 @@ class FAPLServer {
             try server.start()
         } catch PerfectError.networkError(let err, let msg) {
             print("Network error thrown: \(err) \(msg)")
+        } catch PerfectError.apiError(let err) {
+            print("API error thrown: \(err)")
+        } catch PerfectError.fileError(let err, let msg) {
+            print("File error thrown: \(err) \(msg)")
+        } catch PerfectError.systemError(let err, let msg) {
+            print("System error thrown: \(err) \(msg)")
         } catch {
-            print("Unknown error!")
+            print("Not PerfetError thrown :(")
         }
     }
+
     
     //MARK: - Routes
     
     fileprivate func setupRoutes(for server: HTTPServer) {
-        var routes = Routes()
+        var apiV1Routes = Routes()
 
-        setupRouteIndex(&routes)
+        setupRouteIndex(&apiV1Routes)
+        setupRouteFaplPost(&apiV1Routes)
         
-        server.addRoutes(routes)
+        server.addRoutes(apiV1Routes)
     }
     
     fileprivate func setupRouteIndex(_  routes: inout Routes) {
         routes.add(method: .get, uris: ["/", "/index.html"]) {
             request, response in
             
+            print(request.params())
+                        
             response.setHeader(.contentType, value: "text/html")
             
             mustacheRequest(
@@ -57,6 +69,17 @@ class FAPLServer {
                 handler: Handler(),
                 templatePath: request.documentRoot + "/index.mustache"
             )
+            
+            response.completed()
+        }
+    }
+    
+    fileprivate func setupRouteFaplPost(_ routes: inout Routes) {
+        routes.add(method: .get, uri: "/post/{id}") { request, response in
+            response.setHeader(.contentType, value: "application/json")
+
+            //TODO: finish
+            
             
             
             response.completed()
