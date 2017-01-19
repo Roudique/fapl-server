@@ -17,7 +17,7 @@ let kPort = UInt16(8181)
 
 class FAPLServer  {
     fileprivate let server = HTTPServer()
-    
+    fileprivate let apiManager = FAPLAPIManager()
     
     //MARK: - Lifecycle
     
@@ -47,12 +47,12 @@ class FAPLServer  {
     //MARK: - Routes
     
     fileprivate func setupRoutes(for server: HTTPServer) {
-        var apiV1Routes = Routes()
+        var routes = Routes()
 
-        setupRouteIndex(&apiV1Routes)
-        setupRouteFaplPost(&apiV1Routes)
+        setupRouteIndex(&routes)
+        setupRouteFaplPost(&routes)
         
-        server.addRoutes(apiV1Routes)
+        server.addRoutes(routes)
     }
     
     fileprivate func setupRouteIndex(_  routes: inout Routes) {
@@ -79,7 +79,14 @@ class FAPLServer  {
             response.setHeader(.contentType, value: "application/json")
 
             //TODO: finish
-            
+            print(request.urlVariables)
+            if let idVariable = request.urlVariables["id"] {
+                if let id = Int(idVariable) {
+                    self.apiManager.requestPost(with: id, completionHandler: { str, Error in
+                        
+                    })
+                }
+            }
             
             
             response.completed()
