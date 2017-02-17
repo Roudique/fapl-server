@@ -37,7 +37,8 @@ class FAPLAPIManager {
                 if httpResponse.statusCode == HTTPResponseStatus.ok.code, let data = data {
                     
                     if let str = String.init(data: data, encoding: .windowsCP1251) {
-                        self.parsePost(with: str)
+                        var post = self.parsePost(with: str)
+                        post?.id = id
                         completionHandler(str, nil)
                     }
                 }

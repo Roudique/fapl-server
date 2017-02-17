@@ -10,8 +10,83 @@ import Foundation
 import Scrape
 
 extension FAPLAPIManager {
-    func parse(date: String) -> Date? {
-        //        let components = date.split(delimiter: .init(charactersIn: " "), needEmpty: false)
+    
+    func parsePost(with html: String) -> FAPLPost? {
+        if let doc = HTMLDocument(html: html, encoding: .windowsCP1251) {
+            var post = FAPLPost()
+            
+            guard let content = doc.element(atXPath: "//div[@class='content']", namespaces: nil) else {return nil}
+            
+            post.title = parseName(content: content)
+            
+            
+            let contentNodes = Array.init(content.search(byXPath: "p").enumerated())
+            var paragraphs = [String]()
+            for node in contentNodes {
+                
+                if node.offset == 0 {
+                    let imgPath = parseImage(element: node.element)
+                    post.imgPath = imgPath
+                }
+                
+                if let paragraph = node.element.content {
+                    paragraphs.append(contentsOf: paragraph.components(separatedBy: .newlines).filter({ p in
+                        return !p.isEmpty
+                    }))
+//                    paragraphs.append(paragraph)
+                }
+            
+            }
+            
+            
+            post.paragraphs = paragraphs
+            
+            let tags = parseTags(doc: doc)
+            post.tags = tags
+            
+            let dateXPath = doc.search(byXPath: "//p[@class='date f-r']")
+            switch dateXPath {
+            case .nodeSet(let dateNodeSet):
+                if let dateTimeString = dateNodeSet.first?.content {
+                    if let date = parse(date: dateTimeString) {
+                        post.timestamp = Int(date.timeIntervalSince1970)
+                    }
+                }
+            default:
+                break
+            }
+            
+            return post
+        }
+        
+        return nil
+    }
+    
+    private func parseName(content: XPathResult._Element) -> String? {
+        let block = content.element(atXPath: "//div[@class='block']")
+        let h2 = block?.element(atCSSSelector: "h2")
+        return h2?.content
+    }
+    
+    private func parseTags(doc: HTMLDocument) -> [String] {
+        guard let tagsContent = doc.element(atXPath: "//p[@class='tags']", namespaces: nil)?.content else {return []}
+        let tags = tagsContent.components(separatedBy: ",").map({ tag in
+            return tag.trimmingCharacters(in: .whitespacesAndNewlines)
+        })
+        return tags
+    }
+    
+    private func parseImage(element: XPathResult._Element) -> String? {
+        if let imgNode = element.search(byXPath: "img").first {
+            if let imgPath = imgNode["src"] {
+                return imgPath
+            }
+        }
+        
+        return nil
+    }
+    
+    private func parse(date: String) -> Date? {
         let components = date.components(separatedBy: " ").filter { str in
             !str.isEmpty
         }
@@ -23,168 +98,11 @@ extension FAPLAPIManager {
             let dateFormatter = DateFormatter()
             dateFormatter.timeZone = TimeZone.init(secondsFromGMT: moscowGMTTimeDifference)
             dateFormatter.dateFormat = "dd.MM.yyyy hh:mm"
+            
             return dateFormatter.date(from: fullDateString)
         }
         
         return nil
-        //    }
-    }
-    
-    
-    func parsePost(with html: String) -> Void {
-        var postName : String?
-        
-        if let doc = HTMLDocument(html: html, encoding: .windowsCP1251) {
-            //parse name of post
-            let header = doc.search(byXPath: "//h2")
-            switch header {
-            case .nodeSet(let headers):
-                for headerXML in headers {
-                    if headerXML.parent?.className == "block" {
-                        postName = headerXML.text
-                    }
-                }
-            default:
-                break;
-            }
-            
-            var items = [String]()
-            var comparisonParagraphs = [String]()
-            var logoImage : String?
-            
-//            let content = doc.search(byXPath: "//div[@class='content']")
-            
-            guard let content = doc.element(atXPath: "//div[@class='content']", namespaces: nil) else {return}
-            
-            let contentNodes = Array.init(content.search(byXPath: "p").enumerated())
-            
-            for node in content.search(byXPath: "p").enumerated() {
-                print("Node's element: \(node.element)")
-                
-                
-            }
-            
-            let tags = parseTags(doc: doc)
-            print("Tags: \(tags)")
-            
-            //parse text of post
-//            switch content {
-//            case .nodeSet(let contentSet):
-//                for content in contentSet {
-//                    if content.parent?.className == "block" {
-//                        
-//                        for offsetAndelement in content.search(byXPath: "p").enumerated() {
-//                            let element = offsetAndelement.element
-//                            
-//                            let images = element.search(byXPath: "img")
-//                            logoImage = images.first?["src"]
-//                            if logoImage != nil {
-////                                print("Logo image: \(logoImage)\n")
-//                            }
-//                            
-//                            if images.count > 1 {
-//                                for _ in 1...images.count-1 {
-//                                    //                                    print("Image: \(images.enumerated())")
-////                                    print("Image detected")
-//                                }
-//                            }
-//                            
-//                            if let paragraphItem = element.content {
-//                                let separatedParagraphs = paragraphItem.components(separatedBy: .controlCharacters).filter({ str in
-//                                    !str.isEmpty
-//                                })
-//                                var paragraphs = [String]()
-//                                for paragraph in separatedParagraphs {
-//                                    paragraphs.append(paragraph)
-//                                }
-//                                
-//                                items.append(contentsOf: paragraphs)
-//                            }
-//                            
-//                            if let paragraphItem = element.content {
-//                                
-//                                let separatedParagraphs = paragraphItem.components(separatedBy: .controlCharacters).filter({ string in
-//                                    !string.isEmpty
-//                                })
-//                                
-//                                var paragraphs = [String]()
-//                                for paragraph in separatedParagraphs {
-//                                    paragraphs.append(paragraph)
-//                                }
-//                                
-//                                comparisonParagraphs.append(contentsOf: paragraphs)
-//                            }
-//                        }
-//                        
-//                    }
-//                }
-//            default:
-//                break
-//            }
-            
-//            var tags = [String]()
-//            let tagsXPath = doc.search(byXPath: "//p[@class='tags']")
-//            switch tagsXPath {
-//            case .nodeSet(let tagsSet):
-//                for tag in tagsSet {
-//                    if let tagString = tag.content {
-//                        let tagsArray = tagString.components(separatedBy: CharacterSet.init(charactersIn: ",")).filter({ string in
-//                            !string.isEmpty
-//                        })
-//                        //                        tagsArray = tagsArray.map({ str in
-//                        //                            return str.trim()
-//                        //                        })
-//                        
-//                        tags.append(contentsOf: tagsArray)
-//                    }
-//                }
-//            default:
-//                break
-//            }
-            
-            let dateXPath = doc.search(byXPath: "//p[@class='date f-r']")
-            var timestamp : Int?
-            switch dateXPath {
-            case .nodeSet(let dateNodeSet):
-                if let dateTimeString = dateNodeSet.first?.content {
-                    if let date = parse(date: dateTimeString) {
-                        timestamp = Int(date.timeIntervalSince1970)
-                    }
-                }
-            default:
-                break
-            }
-            
-            if let name = postName {
-//                let post = FAPLPost.init(ID: id, imgPath: logoImage, title: name, paragraphs: items)
-                var post = FAPLPost()
-                post.imgPath = logoImage
-                post.title = name
-                post.paragraphs = items
-//                post.tags = tags
-                post.timestamp = timestamp
-                
-//                print("Post name: \(name), tags: \(tags)")
-
-                return;
-            } else {
-//                print("Error parsing HTML:\n")
-                if postName == nil {
-//                    print("-- no post name found;")
-                }
-            }
-           
-//            print(postName ?? "netu posta imeni :(")
-            
-        }
-    }
-    
-    func parseTags(doc: HTMLDocument) -> [String] {
-        guard let tagsContent = doc.element(atXPath: "//p[@class='tags']", namespaces: nil)?.content else {return []}
-        let tags = tagsContent.components(separatedBy: ",").map({ tag in
-            return tag.trimmingCharacters(in: .whitespacesAndNewlines)
-        })
-        return tags
     }
     
 }

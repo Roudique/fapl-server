@@ -13,7 +13,7 @@ import PerfectMustache
 import Foundation
 import SwiftyJSON
 
-let kPort = UInt16(8181)
+let kPort = UInt16(8282)
 
 class FAPLServer  {
     fileprivate let server = HTTPServer()
