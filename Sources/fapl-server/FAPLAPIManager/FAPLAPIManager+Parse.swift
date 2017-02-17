@@ -17,9 +17,10 @@ extension FAPLAPIManager {
             
             guard let content = doc.element(atXPath: "//div[@class='content']", namespaces: nil) else {return nil}
             
+            //parse title
             post.title = parseName(content: content)
             
-            
+            //parse paragraphs
             let contentNodes = Array.init(content.search(byXPath: "p").enumerated())
             var paragraphs = [String]()
             for node in contentNodes {
@@ -33,17 +34,16 @@ extension FAPLAPIManager {
                     paragraphs.append(contentsOf: paragraph.components(separatedBy: .newlines).filter({ p in
                         return !p.isEmpty
                     }))
-//                    paragraphs.append(paragraph)
                 }
             
             }
-            
-            
             post.paragraphs = paragraphs
             
+            //parse tags
             let tags = parseTags(doc: doc)
             post.tags = tags
             
+            //parse timestamp
             let dateXPath = doc.search(byXPath: "//p[@class='date f-r']")
             switch dateXPath {
             case .nodeSet(let dateNodeSet):
