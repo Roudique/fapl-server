@@ -59,8 +59,6 @@ class FAPLServer  {
         routes.add(method: .get, uris: ["/", "/index.html"]) {
             request, response in
             
-            print(request.params())
-                        
             response.setHeader(.contentType, value: "text/html")
             
             mustacheRequest(
@@ -79,16 +77,15 @@ class FAPLServer  {
             response.setHeader(.contentType, value: "application/json")
 
             //TODO: finish
-            print(request.urlVariables)
             if let idVariable = request.urlVariables["id"] {
                 if let id = Int(idVariable) {
                     self.apiManager.requestPost(with: id, completionHandler: { str, Error in
-                        
+
                     })
                 }
             }
             
-            
+            response.appendBody(string: "ololo")
             response.completed()
         }
     }

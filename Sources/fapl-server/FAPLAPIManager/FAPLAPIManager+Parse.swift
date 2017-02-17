@@ -34,7 +34,7 @@ extension FAPLAPIManager {
     func parsePost(with html: String) -> Void {
         var postName : String?
         
-        if let doc = HTMLDocument(html: html, encoding: .utf8) {
+        if let doc = HTMLDocument(html: html, encoding: .windowsCP1251) {
             //parse name of post
             let header = doc.search(byXPath: "//h2")
             switch header {
@@ -52,82 +52,95 @@ extension FAPLAPIManager {
             var comparisonParagraphs = [String]()
             var logoImage : String?
             
-            let content = doc.search(byXPath: "//div[@class='content']")
+//            let content = doc.search(byXPath: "//div[@class='content']")
+            
+            guard let content = doc.element(atXPath: "//div[@class='content']", namespaces: nil) else {return}
+            
+            let contentNodes = Array.init(content.search(byXPath: "p").enumerated())
+            
+            for node in content.search(byXPath: "p").enumerated() {
+                print("Node's element: \(node.element)")
+                
+                
+            }
+            
+            let tags = parseTags(doc: doc)
+            print("Tags: \(tags)")
             
             //parse text of post
-            switch content {
-            case .nodeSet(let contentSet):
-                for content in contentSet {
-                    if content.parent?.className == "block" {
-                        
-                        for offsetAndelement in content.search(byXPath: "p").enumerated() {
-                            let element = offsetAndelement.element
-                            
-                            let images = element.search(byXPath: "img")
-                            logoImage = images.first?["src"]
-                            if logoImage != nil {
-                                print("Logo image: \(logoImage)\n")
-                            }
-                            
-                            if images.count > 1 {
-                                for _ in 1...images.count-1 {
-                                    //                                    print("Image: \(images.enumerated())")
-                                    print("Image detected")
-                                }
-                            }
-                            
-                            if let paragraphItem = element.content {
-                                let separatedParagraphs = paragraphItem.components(separatedBy: .controlCharacters).filter({ str in
-                                    !str.isEmpty
-                                })
-                                var paragraphs = [String]()
-                                for paragraph in separatedParagraphs {
-                                    paragraphs.append(paragraph)
-                                }
-                                
-                                items.append(contentsOf: paragraphs)
-                            }
-                            
-                            if let paragraphItem = element.content {
-                                
-                                let separatedParagraphs = paragraphItem.components(separatedBy: .controlCharacters).filter({ string in
-                                    !string.isEmpty
-                                })
-                                
-                                var paragraphs = [String]()
-                                for paragraph in separatedParagraphs {
-                                    paragraphs.append(paragraph)
-                                }
-                                
-                                comparisonParagraphs.append(contentsOf: paragraphs)
-                            }
-                        }
-                        
-                    }
-                }
-            default:
-                break
-            }
+//            switch content {
+//            case .nodeSet(let contentSet):
+//                for content in contentSet {
+//                    if content.parent?.className == "block" {
+//                        
+//                        for offsetAndelement in content.search(byXPath: "p").enumerated() {
+//                            let element = offsetAndelement.element
+//                            
+//                            let images = element.search(byXPath: "img")
+//                            logoImage = images.first?["src"]
+//                            if logoImage != nil {
+////                                print("Logo image: \(logoImage)\n")
+//                            }
+//                            
+//                            if images.count > 1 {
+//                                for _ in 1...images.count-1 {
+//                                    //                                    print("Image: \(images.enumerated())")
+////                                    print("Image detected")
+//                                }
+//                            }
+//                            
+//                            if let paragraphItem = element.content {
+//                                let separatedParagraphs = paragraphItem.components(separatedBy: .controlCharacters).filter({ str in
+//                                    !str.isEmpty
+//                                })
+//                                var paragraphs = [String]()
+//                                for paragraph in separatedParagraphs {
+//                                    paragraphs.append(paragraph)
+//                                }
+//                                
+//                                items.append(contentsOf: paragraphs)
+//                            }
+//                            
+//                            if let paragraphItem = element.content {
+//                                
+//                                let separatedParagraphs = paragraphItem.components(separatedBy: .controlCharacters).filter({ string in
+//                                    !string.isEmpty
+//                                })
+//                                
+//                                var paragraphs = [String]()
+//                                for paragraph in separatedParagraphs {
+//                                    paragraphs.append(paragraph)
+//                                }
+//                                
+//                                comparisonParagraphs.append(contentsOf: paragraphs)
+//                            }
+//                        }
+//                        
+//                    }
+//                }
+//            default:
+//                break
+//            }
             
-            var tags = [String]()
-            let tagsXPath = doc.search(byXPath: "//p[@class='tags']")
-            switch tagsXPath {
-            case .nodeSet(let tagsSet):
-                for tag in tagsSet {
-                    if let tagString = tag.content {
-                        let tagsArray = tagString.components(separatedBy: CharacterSet.init(charactersIn: ",")).filter({ string in
-                            !string.isEmpty
-                        })
-                        //                        tagsArray = tagsArray.map({ str in
-                        //                            return str.trim()
-                        //                        })
-                        
-                        tags.append(contentsOf: tagsArray)
-                    }
-                }
-            default:
-                break
-            }
+//            var tags = [String]()
+//            let tagsXPath = doc.search(byXPath: "//p[@class='tags']")
+//            switch tagsXPath {
+//            case .nodeSet(let tagsSet):
+//                for tag in tagsSet {
+//                    if let tagString = tag.content {
+//                        let tagsArray = tagString.components(separatedBy: CharacterSet.init(charactersIn: ",")).filter({ string in
+//                            !string.isEmpty
+//                        })
+//                        //                        tagsArray = tagsArray.map({ str in
+//                        //                            return str.trim()
+//                        //                        })
+//                        
+//                        tags.append(contentsOf: tagsArray)
+//                    }
+//                }
+//            default:
+//                break
+//            }
             
             let dateXPath = doc.search(byXPath: "//p[@class='date f-r']")
             var timestamp : Int?
@@ -148,24 +161,30 @@ extension FAPLAPIManager {
                 post.imgPath = logoImage
                 post.title = name
                 post.paragraphs = items
-                post.tags = tags
+//                post.tags = tags
                 post.timestamp = timestamp
                 
-                print("Post name: \(name), tags: \(tags)")
+//                print("Post name: \(name), tags: \(tags)")
 
                 return;
             } else {
-                print("Error parsing HTML:\n")
+//                print("Error parsing HTML:\n")
                 if postName == nil {
-                    print("-- no post name found;")
+//                    print("-- no post name found;")
                 }
             }
            
-            print(postName ?? "netu posta imeni :(")
+//            print(postName ?? "netu posta imeni :(")
             
         }
-        
-        
-        
     }
+    
+    func parseTags(doc: HTMLDocument) -> [String] {
+        guard let tagsContent = doc.element(atXPath: "//p[@class='tags']", namespaces: nil)?.content else {return []}
+        let tags = tagsContent.components(separatedBy: ",").map({ tag in
+            return tag.trimmingCharacters(in: .whitespacesAndNewlines)
+        })
+        return tags
+    }
+    
 }

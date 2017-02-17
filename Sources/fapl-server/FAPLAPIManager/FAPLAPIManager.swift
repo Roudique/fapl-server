@@ -13,7 +13,6 @@ class FAPLAPIManager {
     let defaultSession = URLSession(configuration: .default)
     var dataTask: URLSessionDataTask?
     
-    fileprivate let kEncoding       = String.Encoding.windowsCP1251
     fileprivate let kBaseFAPLUrl    = "http://fapl.ru"
     fileprivate let kPosts          = "/posts"
     
@@ -24,7 +23,7 @@ class FAPLAPIManager {
             dataTask?.cancel()
         }
         
-        let url = NSURL(string: kBaseFAPLUrl + kPosts + "/\(id)")
+        let url = URL.init(string: kBaseFAPLUrl + kPosts + "/\(id)")
 
         dataTask = defaultSession.dataTask(with: url! as URL) {
             data, response, error in
@@ -36,8 +35,8 @@ class FAPLAPIManager {
             } else if let httpResponse = response as? HTTPURLResponse {
                 
                 if httpResponse.statusCode == HTTPResponseStatus.ok.code, let data = data {
-                    if let str = String.init(data: data, encoding: self.kEncoding){
-                        
+                    
+                    if let str = String.init(data: data, encoding: .windowsCP1251) {
                         self.parsePost(with: str)
                         completionHandler(str, nil)
                     }
