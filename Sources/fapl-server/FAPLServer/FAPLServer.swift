@@ -11,7 +11,7 @@ import PerfectHTTPServer
 import PerfectLib
 import PerfectMustache
 import Foundation
-import SwiftyJSON
+//import SwiftyJSON
 
 let kPort = UInt16(8282)
 
@@ -22,7 +22,7 @@ class FAPLServer  {
     //MARK: - Lifecycle
     
     func run() {
-        server.documentRoot = "./webroot"
+        server.documentRoot = "webroot"
         
         server.serverPort = kPort
         

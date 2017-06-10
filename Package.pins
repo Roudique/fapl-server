@@ -1,0 +1,66 @@
+{
+  "autoPin": true,
+  "pins": [
+    {
+      "package": "CLibxml2",
+      "reason": null,
+      "repositoryURL": "https://github.com/WeirdMath/CLibxml2.git",
+      "version": "1.0.0"
+    },
+    {
+      "package": "COpenSSL",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-COpenSSL.git",
+      "version": "2.0.4"
+    },
+    {
+      "package": "PerfectHTTP",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-HTTP.git",
+      "version": "2.0.7"
+    },
+    {
+      "package": "PerfectHTTPServer",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-HTTPServer.git",
+      "version": "2.0.9"
+    },
+    {
+      "package": "PerfectLib",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/PerfectLib.git",
+      "version": "2.0.10"
+    },
+    {
+      "package": "PerfectMustache",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-Mustache.git",
+      "version": "2.0.4"
+    },
+    {
+      "package": "PerfectNet",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-Net.git",
+      "version": "2.0.5"
+    },
+    {
+      "package": "PerfectThread",
+      "reason": null,
+      "repositoryURL": "https://github.com/PerfectlySoft/Perfect-Thread.git",
+      "version": "2.0.12"
+    },
+    {
+      "package": "Scrape",
+      "reason": null,
+      "repositoryURL": "https://github.com/WeirdMath/Scrape.git",
+      "version": "1.0.0"
+    },
+    {
+      "package": "SwiftString",
+      "reason": null,
+      "repositoryURL": "https://github.com/iamjono/SwiftString.git",
+      "version": "1.0.14"
+    }
+  ],
+  "version": 1
+}
