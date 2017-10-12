@@ -64,7 +64,8 @@ extension FAPLAPIManager {
     
     private func parseName(content: XPathResult._Element) -> String? {
         let block = content.element(atXPath: "//div[@class='block']")
-        let h2 = block?.element(atCSSSelector: "h2")
+        let h2 = block?.element(atXPath: "//h2")
+        
         return h2?.content
     }
     
